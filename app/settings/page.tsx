@@ -9,13 +9,7 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase/config"
-import {
-  getUserProfile,
-  updateUserProfile,
-  createUserProfile,
-  convertUserToCreator,
-  type UserProfile,
-} from "@/lib/firebase/firestore"
+import { getUserProfile, updateUserProfile, createUserProfile, type UserProfile } from "@/lib/firebase/firestore"
 import { AVATAR_OPTIONS, getRandomAvatar } from "@/lib/avatars"
 
 export default function EditProfile() {
@@ -24,7 +18,6 @@ export default function EditProfile() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [convertingToCreator, setConvertingToCreator] = useState(false)
 
   const [formData, setFormData] = useState({
     username: "",
@@ -109,25 +102,6 @@ export default function EditProfile() {
       alert("Erro ao salvar perfil. Tente novamente.")
     } finally {
       setSaving(false)
-    }
-  }
-
-  const handleConvertToCreator = async () => {
-    if (!user || !profile) return
-
-    const confirmed = confirm("Deseja se tornar uma criadora? Isso permitirá que você crie posts e conteúdo exclusivo.")
-    if (!confirmed) return
-
-    setConvertingToCreator(true)
-    try {
-      await convertUserToCreator(user.uid)
-      alert("Conta convertida para criadora com sucesso! Recarregue a página.")
-      window.location.reload()
-    } catch (error) {
-      console.error("[v0] Error converting to creator:", error)
-      alert("Erro ao converter conta. Tente novamente.")
-    } finally {
-      setConvertingToCreator(false)
     }
   }
 
@@ -250,33 +224,6 @@ export default function EditProfile() {
             "Salvar Alterações"
           )}
         </Button>
-
-        {/* Creator Conversion Button */}
-        {profile?.userType !== "creator" && (
-          <div className="pt-6 border-t border-border">
-            <div className="space-y-3">
-              <h3 className="font-semibold text-sm">Tornar-se Criadora</h3>
-              <p className="text-xs text-muted-foreground">
-                Converta sua conta para criadora e comece a publicar conteúdo exclusivo para seus seguidores.
-              </p>
-              <Button
-                variant="outline"
-                className="w-full rounded-full bg-transparent"
-                onClick={handleConvertToCreator}
-                disabled={convertingToCreator}
-              >
-                {convertingToCreator ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Convertendo...
-                  </>
-                ) : (
-                  "Tornar-se Criadora"
-                )}
-              </Button>
-            </div>
-          </div>
-        )}
       </main>
     </div>
   )
